@@ -4,6 +4,8 @@
 
 #define LARGO 50
 
+// Oloroso puto
+
 enum nodo_state {BUSY,EMPTY,DELETED};
 
 struct hash {

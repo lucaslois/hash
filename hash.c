@@ -25,12 +25,7 @@ int hash_function(char *key_string){
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
 
     hash_t * hash = malloc(sizeof(hash_t));
-<<<<<<< HEAD
     if(hash==NULL)return NULL;
-=======
-    if(hash==NULL)
-        return NULL;
->>>>>>> master
     hash->length = 0;
     hash->busy = LARGO;
     hash_node_t * hash_array = malloc(sizeof(hash_node_t)*hash->length);

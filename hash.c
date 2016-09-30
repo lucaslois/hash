@@ -18,7 +18,7 @@ struct hash_node {
     enum nodo_state state;
 } typedef hash_node_t;
 
-int hash_function(char *key_string){
+int hash_function(char *key_string){ // Hola Lucs.. no se pq me parece que esta funcion tiene que esta en la estructura del hash.
     return strlen(key_string);
 }
 
@@ -52,3 +52,15 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
         }
     }
 }
+
+size_t hash_cantidad(const hash_t *hash){
+    return hash->busy_space;
+}
+
+void *hash_obtener(const hash_t *hash, const char *clave){ }
+
+void *hash_borrar(hash_t *hash, const char *clave){ }
+
+bool hash_pertenece(const hash_t *hash, const char *clave){ }
+
+void hash_destruir(hash_t *hash){ }

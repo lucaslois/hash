@@ -12,6 +12,7 @@ struct hash {
     size_t busy_space;
 };
 
+/// hola com etas
 struct hash_node {
     char * key;
     void * value;
@@ -29,7 +30,6 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     hash->length = 0;
     hash->busy = LARGO;
     hash_node_t * hash_array = malloc(sizeof(hash_node_t)*hash->length);
-//continue here
 }
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {

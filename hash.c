@@ -11,9 +11,9 @@ struct hash_node {
     char * key;
     void * value;
     enum nodo_state state;
-} typedef hash_node_t
+} typedef hash_node_t;
 
-struct hash { // Acá nos falta la funcion destruir.
+struct hash {
     hash_node_t * hash_array;
     size_t length;
     size_t busy_space;
@@ -33,26 +33,26 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
 
     // Inicializo todos los nodos en EMPTY.
     for(int i = 0; i< hash->length ; i++){
-        hash_array[i]->state = EMPTY;
+        hash_array[i].state = EMPTY;
     }
 }
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
     char * key_copy = malloc(sizeof(char[strlen(clave)]));
-    key_copy = strcpy(clave);
+    strcpy(key_copy,clave);
 
     int hashed_key = hash_function(key_copy);
 
     for(int i = hashed_key ; hashed_key < hash->length; i++) {
-        if(hash->hash_array[i]->state == EMPTY) {
-            hash->hash_array[i]->key = key_copy;
-            hash->hash_array[i]->value = dato; //*dato
-            hash->hash_array[i]->state = BUSY;
+        if(hash->hash_array[i].state == EMPTY) {
+            hash->hash_array[i].key = key_copy;
+            hash->hash_array[i].value = dato; //*dato
+            hash->hash_array[i].state = BUSY;
             return true;
         }
-        if(hash->hash_array[i]->state == BUSY && strcmp(clave,hash->hash_array[i]->key) == 0 ) {
-            hash->hash_array[i]->value = dato;
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            hash->hash_array[i].value = dato;
             return true;
         }
     }
@@ -65,12 +65,37 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 size_t hash_cantidad(const hash_t *hash){
     return hash->busy_space;
 }
-/*
+
 void *hash_obtener(const hash_t *hash, const char *clave) {
+  return NULL;
 }
 
-void *hash_borrar(hash_t *hash, const char *clave){ }
+void *hash_borrar(hash_t *hash, const char *clave){
+return NULL;}
 
-bool hash_pertenece(const hash_t *hash, const char *clave){ }
+bool hash_pertenece(const hash_t *hash, const char *clave){
+return NULL;}
 
-void hash_destruir(hash_t *hash){ }*/
+void hash_destruir(hash_t *hash){
+  return;
+}
+
+hash_iter_t *hash_iter_crear(const hash_t *hash){
+  return NULL;
+}
+
+bool hash_iter_avanzar(hash_iter_t *iter){
+  return NULL;
+}
+
+const char *hash_iter_ver_actual(const hash_iter_t *iter){
+  return NULL;
+}
+
+bool hash_iter_al_final(const hash_iter_t *iter){
+  return NULL;
+}
+
+void hash_iter_destruir(hash_iter_t* iter){
+  return;
+}

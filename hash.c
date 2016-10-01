@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "hash.h"
 
 #define LARGO 50
 
@@ -65,15 +66,12 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 size_t hash_cantidad(const hash_t *hash){
     return hash->busy_space;
 }
-
+/*
 void *hash_obtener(const hash_t *hash, const char *clave) {
-    int hashed_key = hash_function(clave);
-
-    for()
 }
 
 void *hash_borrar(hash_t *hash, const char *clave){ }
 
 bool hash_pertenece(const hash_t *hash, const char *clave){ }
 
-void hash_destruir(hash_t *hash){ }
+void hash_destruir(hash_t *hash){ }*/

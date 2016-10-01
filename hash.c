@@ -84,7 +84,7 @@ void *hash_obtener(const hash_t *hash, const char *clave) {
             return NULL;
         }
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
-            return hash_array[i].value;
+            return hash->hash_array[i].value;
         }
     }
     for(int i = 0; i < hashed_key; i++) {
@@ -92,9 +92,10 @@ void *hash_obtener(const hash_t *hash, const char *clave) {
             return NULL;
         }
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
-            return hash_array[i].value;
+            return hash->hash_array[i].value;
         }
     }
+    return NULL;
 }
 
 void *hash_borrar(hash_t *hash, const char *clave){

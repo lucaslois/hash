@@ -58,7 +58,16 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
         }
     }
     for(int i = 0; i < hashed_key; i++) {
-        return true;
+        if(hash->hash_array[i].state == EMPTY) {
+            hash->hash_array[i].key = key_copy;
+            hash->hash_array[i].value = dato; //*dato
+            hash->hash_array[i].state = BUSY;
+            return true;
+        }
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            hash->hash_array[i].value = dato;
+            return true;
+        }
     }
     return false;
 }
@@ -68,14 +77,62 @@ size_t hash_cantidad(const hash_t *hash){
 }
 
 void *hash_obtener(const hash_t *hash, const char *clave) {
-  return NULL;
+    int hashed_key = hash_function(key_copy);
+
+    for(int i = hashed_key ; hashed_key < hash->length; i++) {
+        if(hash->hash_array[i].state == EMPTY) {
+            return NULL;
+        }
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            return hash_array[i].value;
+        }
+    }
+    for(int i = 0; i < hashed_key; i++) {
+        if(hash->hash_array[i].state == EMPTY) {
+            return NULL;
+        }
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            return hash_array[i].value;
+        }
+    }
 }
 
 void *hash_borrar(hash_t *hash, const char *clave){
-return NULL;}
+    for(int i = hashed_key ; hashed_key < hash->length; i++) {
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            return hash_array[i].key = NULL;
+            return hash_array[i].value = NULL;
+            return hash_array[i].state = DELETED;
+        }
+    }
+    for(int i = 0; i < hashed_key; i++) {
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            return hash_array[i].key = NULL;
+            return hash_array[i].value = NULL;
+            return hash_array[i].state = DELETED;
+        }
+    }
+}
 
 bool hash_pertenece(const hash_t *hash, const char *clave){
-return NULL;}
+    for(int i = hashed_key ; hashed_key < hash->length; i++) {
+        if(hash->hash_array[i].state == EMPTY) {
+            return false;
+        }
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            return true;
+        }
+    }
+    for(int i = 0; i < hashed_key; i++) {
+        if(hash->hash_array[i].state == EMPTY) {
+            return false;
+        }
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            return true;
+        }
+    }
+    return false;
+}
 
 void hash_destruir(hash_t *hash){
   return;

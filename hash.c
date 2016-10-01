@@ -19,7 +19,7 @@ struct hash {
     size_t busy_space;
 };
 
-int hash_function(char *key_string){
+int hash_function(const char *key_string){
     return (int)strlen(key_string);
 }
 

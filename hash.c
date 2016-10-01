@@ -13,12 +13,12 @@ struct hash { // Acá nos falta la funcion destruir.
     size_t busy_space;
 };
 
-/// hola com etas
+typedef struct hash_node  hash_node_t;
 struct hash_node {
     char * key;
     void * value;
     enum nodo_state state;
-} typedef hash_node_t;
+};
 
 int hash_function(char *key_string){
     return strlen(key_string);

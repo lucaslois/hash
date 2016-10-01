@@ -125,7 +125,7 @@ void *hash_borrar(hash_t *hash, const char *clave){
 }
 
 bool hash_pertenece(const hash_t *hash, const char *clave){
-    int hashed_key = hash_function(key_copy);
+    int hashed_key = hash_function(clave);
 
     for(int i = hashed_key ; hashed_key < hash->length; i++) {
         if(hash->hash_array[i].state == EMPTY) {

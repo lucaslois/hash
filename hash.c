@@ -7,17 +7,16 @@
 
 enum nodo_state {BUSY,EMPTY,DELETED};
 
-struct hash { // Acá nos falta la funcion destruir.
-    hash_node_t * hash_array;
-    size_t length;
-    size_t busy_space;
-};
-
-typedef struct hash_node  hash_node_t;
 struct hash_node {
     char * key;
     void * value;
     enum nodo_state state;
+} typedef hash_node_t
+
+struct hash { // Acá nos falta la funcion destruir.
+    hash_node_t * hash_array;
+    size_t length;
+    size_t busy_space;
 };
 
 int hash_function(char *key_string){

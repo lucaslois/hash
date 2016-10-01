@@ -77,7 +77,7 @@ size_t hash_cantidad(const hash_t *hash){
 }
 
 void *hash_obtener(const hash_t *hash, const char *clave) {
-    int hashed_key = hash_function(key_copy);
+    int hashed_key = hash_function(clave);
 
     for(int i = hashed_key ; hashed_key < hash->length; i++) {
         if(hash->hash_array[i].state == EMPTY) {
@@ -98,7 +98,7 @@ void *hash_obtener(const hash_t *hash, const char *clave) {
 }
 
 void *hash_borrar(hash_t *hash, const char *clave){
-    int hashed_key = hash_function(key_copy);
+    int hashed_key = hash_function(clave);
 
     for(int i = hashed_key ; hashed_key < hash->length; i++) {
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
@@ -118,7 +118,7 @@ void *hash_borrar(hash_t *hash, const char *clave){
 
 bool hash_pertenece(const hash_t *hash, const char *clave){
     int hashed_key = hash_function(key_copy);
-    
+
     for(int i = hashed_key ; hashed_key < hash->length; i++) {
         if(hash->hash_array[i].state == EMPTY) {
             return false;

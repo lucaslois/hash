@@ -103,18 +103,25 @@ void *hash_borrar(hash_t *hash, const char *clave){
 
     for(int i = hashed_key ; hashed_key < hash->length; i++) {
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
-            return hash_array[i].key = NULL;
-            return hash_array[i].value = NULL;
-            return hash_array[i].state = DELETED;
+            void* aux = hash->hash_array[i].value;
+            hash->hash_array[i].key = NULL;
+            hash->hash_array[i].value = NULL;
+            hash->hash_array[i].state = DELETED;
+
+            return aux;
         }
     }
     for(int i = 0; i < hashed_key; i++) {
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
-            return hash_array[i].key = NULL;
-            return hash_array[i].value = NULL;
-            return hash_array[i].state = DELETED;
+            void* aux = hash->hash_array[i].value;
+            hash->hash_array[i].key = NULL;
+            hash->hash_array[i].value = NULL;
+            hash->hash_array[i].state = DELETED;
+
+            return aux;
         }
     }
+    return NULL;
 }
 
 bool hash_pertenece(const hash_t *hash, const char *clave){

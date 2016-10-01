@@ -20,7 +20,7 @@ struct hash {
 };
 
 int hash_function(char *key_string){
-    return strlen(key_string);
+    return (int)strlen(key_string);
 }
 
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
@@ -35,6 +35,7 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     for(int i = 0; i< hash->length ; i++){
         hash_array[i].state = EMPTY;
     }
+    return hash;
 }
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {

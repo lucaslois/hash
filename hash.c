@@ -74,10 +74,10 @@ void hash_copy(hash_t* old_hash, hash_t* new_hash) {
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
     //char * key_copy = malloc(sizeof(char[strlen(clave)]));
-    char *key_copy[];
-    strcpy(*key_copy,clave);
+    char key_copy[500];
+    strcpy(key_copy,clave);
 
-    int hashed_key = hash_function(*key_copy, (int)hash->length);
+    int hashed_key = hash_function(key_copy, (int)hash->length);
 
     if(hash->busy_space == hash->length) {
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
@@ -89,7 +89,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
     for(int i = hashed_key ; i < hash->length; i++) {
         if(hash->hash_array[i].state == EMPTY) {
-            hash->hash_array[i].key = *key_copy;
+            hash->hash_array[i].key = key_copy;
             hash->hash_array[i].value = dato;
             hash->hash_array[i].state = BUSY;
             hash->busy_space++;
@@ -102,7 +102,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     }
     for(int i = 0; i < hashed_key; i++) {
         if(hash->hash_array[i].state == EMPTY) {
-            hash->hash_array[i].key = *key_copy;
+            hash->hash_array[i].key = key_copy;
             hash->hash_array[i].value = dato; //*dato
             hash->hash_array[i].state = BUSY;
             hash->busy_space++;

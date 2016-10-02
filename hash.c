@@ -73,8 +73,8 @@ void hash_copy(hash_t* old_hash, hash_t* new_hash) {
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
-    //char * key_copy = malloc(sizeof(char[strlen(clave)]));
-    char key_copy[500];
+    char * key_copy = malloc(sizeof(char));
+    //char key_copy[500];
     strcpy(key_copy,clave);
 
     int hashed_key = hash_function(key_copy, (int)hash->length);

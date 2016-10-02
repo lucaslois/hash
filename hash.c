@@ -30,7 +30,7 @@ int hash_function(const char *key_string, int tam){
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
 
     hash_t * hash = malloc(sizeof(hash_t));
-    if(hash==NULL)return NULL;
+    if(hash==NULL) return NULL;
     hash->length = LARGO;
     hash->busy_space = 0;
     hash_node_t * hash_array = malloc(sizeof(hash_node_t) * hash->length);

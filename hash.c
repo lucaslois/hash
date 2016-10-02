@@ -19,22 +19,21 @@ struct hash {
     size_t busy_space;
 };
 
-int hash_function(const char *key_string, int tam){
-    int aux = (int)strlen(key_string);
+int hash_function(const char *key_string, size_t tam){
+    size_t aux = strlen(key_string);
     while (aux > tam) {
         aux -= tam;
     }
-    return aux;
+    return (int)aux;
 }
-
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
 
     hash_t * hash = malloc(sizeof(hash_t));
     if(hash==NULL) return NULL;
     hash->length = LARGO;
     hash->busy_space = 0;
-    hash_node_t * hash_array = malloc(sizeof(hash_node_t) * hash->length);
-    hash->hash_array = hash_array;
+    hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
+
 
     // Inicializo todos los nodos en EMPTY.
     for(int i = 0; i < hash->length; i++){
@@ -72,20 +71,18 @@ void hash_copy(hash_t* old_hash, hash_t* new_hash) {
 }
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
-
-    char * key_copy = malloc(sizeof(char));
-    //char key_copy[500];
+    char * key_copy = malloc(sizeof(char[strlen(clave)+1]));
     strcpy(key_copy,clave);
 
-    int hashed_key = hash_function(key_copy, (int)hash->length);
-
-    if(hash->busy_space == hash->length) {
+    if(hash->busy_space == hash->length/2 ) {
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
         hash_copy(new_hash, hash);
-
+        hash->length = new_hash->length; //esto solucion bastante
         hash_destruir(hash);
         hash = new_hash;
     }
+
+    int hashed_key = hash_function(clave, hash->length); //por lo que se le pasaba aca..
 
     for(int i = hashed_key ; i < hash->length; i++) {
         if(hash->hash_array[i].state == EMPTY) {
@@ -121,7 +118,7 @@ size_t hash_cantidad(const hash_t *hash){
 }
 
 void *hash_obtener(const hash_t *hash, const char *clave) {
-    int hashed_key = hash_function(clave, (int)hash->length);
+    int hashed_key = hash_function(clave, hash->length);
 
     if(hash->busy_space == 0)
         return NULL;
@@ -147,9 +144,6 @@ void *hash_obtener(const hash_t *hash, const char *clave) {
 
 void *hash_borrar(hash_t *hash, const char *clave){
     int hashed_key = hash_function(clave, (int)hash->length);
-
-    if(hash->busy_space == 0)
-        return NULL;
 
     if(hash->busy_space == 0)
         return NULL;
@@ -205,6 +199,7 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
 }
 
 void hash_destruir(hash_t *hash){
+
   free(hash->hash_array);
   free(hash);
 }

@@ -77,10 +77,14 @@ void hash_copy(hash_t* old_hash, hash_t* new_hash) {
 }
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
-    char * key_copy = malloc(sizeof(char[strlen(clave)+1]));
+
+    char *key_copy = malloc(sizeof(char)*(strlen(clave)+1));
     strcpy(key_copy,clave);
 
+//    char *key_copy = strdup("ASDAS");
+
     if(hash->busy_space > (hash->length - hash->length / 5)) {
+        printf("\n\n%s\n\n","SE PRODUJO UNA REDIMENSION" );
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
         hash_copy(hash, new_hash);
         //hash_destruir(hash); // ESTO ES LO QEU HAY QUE FIXEAR, LOS ERRORES EN VALGRIND SON POR ESTO
@@ -212,8 +216,9 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
 
 void hash_destruir(hash_t *hash){
   for(int i = 0; i < hash->length; i++){
-    if(hash->hash_array[i].state == BUSY)
+    if(hash->hash_array[i].state == BUSY || hash->hash_array[i].state == DELETED){
       free(hash->hash_array[i].key);
+    }
   }
   free(hash->hash_array);
   free(hash);
@@ -245,10 +250,13 @@ hash_iter_t *hash_iter_crear(const hash_t *hash) {
 }
 
 bool hash_iter_avanzar(hash_iter_t *iter){
+
     if(!hash_iter_al_final(iter)) {
         iter->pos++;
-        if(iter->hash->hash_array[iter->pos].state != BUSY)
-            return hash_iter_avanzar(iter);
+        if(hash_iter_al_final(iter)) return true;
+        if(iter->hash->hash_array[iter->pos].state != BUSY){
+            return hash_iter_avanzar(iter);}
+
         return true;
     }
     return false;

@@ -3,7 +3,7 @@
 #include <string.h>
 #include "hash.h"
 
-#define LARGO 100
+#define LARGO 50
 
 enum nodo_state {BUSY,EMPTY,DELETED};
 
@@ -19,6 +19,8 @@ struct hash {
     size_t busy_space;
 };
 
+// La función de Hash recibe por parametro una cadena y un rango, y devuelve
+// un entero dentro de ese rango correspondiente al valor de Hash de esa cadena.
 int hash_function(const char *key_string, size_t tam){
     size_t aux = strlen(key_string);
     while (aux > tam) {
@@ -26,14 +28,14 @@ int hash_function(const char *key_string, size_t tam){
     }
     return (int)aux;
 }
-hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
 
+
+hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     hash_t * hash = malloc(sizeof(hash_t));
-    if(hash==NULL) return NULL;
+    if(!hash) return NULL;
     hash->length = LARGO;
     hash->busy_space = 0;
     hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
-
 
     // Inicializo todos los nodos en EMPTY.
     for(int i = 0; i < hash->length; i++){
@@ -45,20 +47,19 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
 }
 
 hash_t *hash_crear_custom(hash_destruir_dato_t destruir_dato, size_t tam) {
-        hash_t * hash = malloc(sizeof(hash_t));
-        if(hash==NULL) return NULL;
-        hash->length = tam;
-        hash->busy_space = 0;
-        hash_node_t * hash_array = malloc(sizeof(hash_node_t) * hash->length);
-        hash->hash_array = hash_array;
+    hash_t * hash = malloc(sizeof(hash_t));
+    if(!hash) return NULL;
+    hash->length = tam;
+    hash->busy_space = 0;
+    hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
-        // Inicializo todos los nodos en EMPTY.
-        for(int i = 0; i < hash->length; i++){
-            hash->hash_array[i].state = EMPTY;
-            hash->hash_array[i].key = NULL;
-            hash->hash_array[i].value = NULL;
-        }
-        return hash;
+    // Inicializo todos los nodos en EMPTY.
+    for(int i = 0; i < hash->length; i++){
+        hash->hash_array[i].state = EMPTY;
+        hash->hash_array[i].key = NULL;
+        hash->hash_array[i].value = NULL;
+    }
+    return hash;
 }
 
 void hash_copy(hash_t* old_hash, hash_t* new_hash) {
@@ -74,15 +75,14 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     char * key_copy = malloc(sizeof(char[strlen(clave)+1]));
     strcpy(key_copy,clave);
 
-    if(hash->busy_space == hash->length/2 ) {
+    if(hash->busy_space > (hash->length - hash->length / 5)) {
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
-        hash_copy(new_hash, hash);
-        hash->length = new_hash->length; //esto solucion bastante
-        hash_destruir(hash);
-        hash = new_hash;
+        hash_copy(hash, new_hash);
+        //hash_destruir(hash);
+        *hash = *new_hash;
     }
 
-    int hashed_key = hash_function(clave, hash->length); //por lo que se le pasaba aca..
+    int hashed_key = hash_function(clave, hash->length);
 
     for(int i = hashed_key ; i < hash->length; i++) {
         if(hash->hash_array[i].state == EMPTY) {
@@ -147,6 +147,13 @@ void *hash_borrar(hash_t *hash, const char *clave){
 
     if(hash->busy_space == 0)
         return NULL;
+
+    if(hash->busy_space == hash->length / 5 ) {
+        hash_t* new_hash = hash_crear_custom(NULL, hash->length / 2);
+        hash_copy(hash, new_hash);
+        //hash_destruir(hash);
+        *hash = *new_hash;
+    }
 
     for(int i = hashed_key ; i < hash->length; i++) {
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {

@@ -73,6 +73,8 @@ bool hash_iter_al_final(const hash_iter_t *iter);
 // Destruye iterador
 void hash_iter_destruir(hash_iter_t* iter);
 
+void hash_mostrar(hash_t *hash);
+
 
 /*HOLA ESTO ES UNA PRUEBA DE EDICION DEL HASHH !! */
 #endif // HASH_H

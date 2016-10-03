@@ -19,6 +19,11 @@ struct hash {
     size_t busy_space;
 };
 
+struct hash_iter {
+    const hash_t *hash;
+    size_t pos;
+};
+
 // La función de Hash recibe por parametro una cadena y un rango, y devuelve
 // un entero dentro de ese rango correspondiente al valor de Hash de esa cadena.
 int hash_function(const char *key_string, size_t tam){
@@ -78,7 +83,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     if(hash->busy_space > (hash->length - hash->length / 5)) {
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
         hash_copy(hash, new_hash);
-        //hash_destruir(hash);
+        //hash_destruir(hash); // ESTO ES LO QEU HAY QUE FIXEAR, LOS ERRORES EN VALGRIND SON POR ESTO
         *hash = *new_hash;
     }
 
@@ -151,7 +156,7 @@ void *hash_borrar(hash_t *hash, const char *clave){
     if(hash->busy_space == hash->length / 5 ) {
         hash_t* new_hash = hash_crear_custom(NULL, hash->length / 2);
         hash_copy(hash, new_hash);
-        //hash_destruir(hash);
+        //hash_destruir(hash); // ESTO ES LO QEU HAY QUE FIXEAR, LOS ERRORES EN VALGRIND SON POR ESTO
         *hash = *new_hash;
     }
 
@@ -214,22 +219,53 @@ void hash_destruir(hash_t *hash){
   free(hash);
 }
 
-hash_iter_t *hash_iter_crear(const hash_t *hash){
-  return NULL;
+// AUXILIAR
+void hash_mostrar(hash_t* hash) {
+    for(int x = 0; x < hash->length; x++) {
+        if(hash->hash_array[x].state == BUSY)
+            printf("Indice %d (colision %d) - [%s]\n", x, hash_function(hash->hash_array[x].key, hash->length), hash->hash_array[x].key);
+        else
+            printf("Indice %d - BORRADO / VACIO\n", x);
+    }
+}
+
+// COMIENZO FUNCIONES DE ITERADOR
+
+hash_iter_t *hash_iter_crear(const hash_t *hash) {
+    hash_iter_t *iter = malloc(sizeof(hash_iter_t));
+    if(!iter)
+        return NULL;
+
+    iter->hash = hash;
+    iter->pos = 0;
+
+    if(iter->hash->hash_array[iter->pos].state != BUSY)
+        hash_iter_avanzar(iter);
+    return iter;
 }
 
 bool hash_iter_avanzar(hash_iter_t *iter){
-  return NULL;
+    if(!hash_iter_al_final(iter)) {
+        iter->pos++;
+        if(iter->hash->hash_array[iter->pos].state != BUSY)
+            return hash_iter_avanzar(iter);
+        return true;
+    }
+    return false;
 }
 
 const char *hash_iter_ver_actual(const hash_iter_t *iter){
-  return NULL;
+    if(hash_iter_al_final(iter))
+        return NULL;
+
+    size_t pos = iter->pos;
+    return iter->hash->hash_array[pos].key;
 }
 
 bool hash_iter_al_final(const hash_iter_t *iter){
-  return NULL;
+    return iter->pos == iter->hash->length;
 }
 
 void hash_iter_destruir(hash_iter_t* iter){
-  return;
+    free(iter);
 }

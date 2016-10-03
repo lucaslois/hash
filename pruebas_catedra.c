@@ -293,11 +293,14 @@ static void prueba_hash_iterar()
     print_test("Prueba hash insertar clave2", hash_guardar(hash, claves[1], valores[1]));
     print_test("Prueba hash insertar clave3", hash_guardar(hash, claves[2], valores[2]));
 
+    hash_mostrar(hash);
+
     // Prueba de iteración sobre las claves almacenadas.
     hash_iter_t* iter = hash_iter_crear(hash);
     const char *clave;
     ssize_t indice;
 
+    printf("La clave es %s\n", hash_iter_ver_actual(iter));
     print_test("Prueba hash iterador esta al final, es false", !hash_iter_al_final(iter));
 
     /* Primer valor */

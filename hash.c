@@ -199,7 +199,10 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
 }
 
 void hash_destruir(hash_t *hash){
-
+  for(int i = 0; i < hash->length; i++){
+    if(hash->hash_array[i].state == BUSY)
+      free(hash->hash_array[i].key);
+  }
   free(hash->hash_array);
   free(hash);
 }

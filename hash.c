@@ -91,7 +91,6 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     }
 
     int hashed_key = hash_function(clave, hash->length);
-
     for(int i = hashed_key ; i < hash->length; i++) {
         if(hash->hash_array[i].state == EMPTY) {
             strcpy(hash->hash_array[i].key,clave);

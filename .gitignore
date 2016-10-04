@@ -21,6 +21,7 @@
 *.dylib
 
 # Executables
+pruebas
 *.exe
 *.out
 *.app

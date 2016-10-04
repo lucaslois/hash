@@ -17,6 +17,7 @@ struct hash {
     hash_node_t * hash_array;
     size_t length;
     size_t busy_space;
+//    hash_destruir_dato_t destroy_f;
 };
 
 struct hash_iter {
@@ -40,14 +41,17 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     if(!hash) return NULL;
     hash->length = LARGO;
     hash->busy_space = 0;
+//    hash->destroy_f = destruir_dato;
     hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
     // Inicializo todos los nodos en EMPTY.
     for(int i = 0; i < hash->length; i++){
         hash->hash_array[i].state = EMPTY;
-        hash->hash_array[i].key = NULL;
+        hash->hash_array[i].key = malloc(sizeof(char[200]));
         hash->hash_array[i].value = NULL;
     }
+
+
     return hash;
 }
 
@@ -61,7 +65,7 @@ hash_t *hash_crear_custom(hash_destruir_dato_t destruir_dato, size_t tam) {
     // Inicializo todos los nodos en EMPTY.
     for(int i = 0; i < hash->length; i++){
         hash->hash_array[i].state = EMPTY;
-        hash->hash_array[i].key = NULL;
+        hash->hash_array[i].key = malloc(sizeof(char[200]));
         hash->hash_array[i].value = NULL;
     }
     return hash;
@@ -78,16 +82,11 @@ void hash_copy(hash_t* old_hash, hash_t* new_hash) {
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
-    char *key_copy = malloc(sizeof(char)*(strlen(clave)+1));
-    strcpy(key_copy,clave);
-
-//    char *key_copy = strdup("ASDAS");
-
-    if(hash->busy_space > (hash->length - hash->length / 5)) {
-        printf("\n\n%s\n\n","SE PRODUJO UNA REDIMENSION" );
+    if(hash->busy_space > (hash->length - hash->length / 2)) {
+        //printf("\n\n%s\n\n","SE PRODUJO UNA REDIMENSION" );
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
         hash_copy(hash, new_hash);
-        //hash_destruir(hash); // ESTO ES LO QEU HAY QUE FIXEAR, LOS ERRORES EN VALGRIND SON POR ESTO
+        hash_destruir(hash);
         *hash = *new_hash;
     }
 
@@ -95,7 +94,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
     for(int i = hashed_key ; i < hash->length; i++) {
         if(hash->hash_array[i].state == EMPTY) {
-            hash->hash_array[i].key = key_copy;
+            strcpy(hash->hash_array[i].key,clave);
             hash->hash_array[i].value = dato;
             hash->hash_array[i].state = BUSY;
             hash->busy_space++;
@@ -108,7 +107,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     }
     for(int i = 0; i < hashed_key; i++) {
         if(hash->hash_array[i].state == EMPTY) {
-            hash->hash_array[i].key = key_copy;
+            strcpy(hash->hash_array[i].key,clave);
             hash->hash_array[i].value = dato; //*dato
             hash->hash_array[i].state = BUSY;
             hash->busy_space++;
@@ -152,15 +151,15 @@ void *hash_obtener(const hash_t *hash, const char *clave) {
 }
 
 void *hash_borrar(hash_t *hash, const char *clave){
-    int hashed_key = hash_function(clave, (int)hash->length);
 
+    int hashed_key = hash_function(clave, (int)hash->length);
     if(hash->busy_space == 0)
         return NULL;
 
     if(hash->busy_space == hash->length / 5 ) {
         hash_t* new_hash = hash_crear_custom(NULL, hash->length / 2);
         hash_copy(hash, new_hash);
-        //hash_destruir(hash); // ESTO ES LO QEU HAY QUE FIXEAR, LOS ERRORES EN VALGRIND SON POR ESTO
+        hash_destruir(hash);
         *hash = *new_hash;
     }
 
@@ -215,11 +214,12 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
 }
 
 void hash_destruir(hash_t *hash){
-  for(int i = 0; i < hash->length; i++){
-    if(hash->hash_array[i].state == BUSY || hash->hash_array[i].state == DELETED){
-      free(hash->hash_array[i].key);
+    for(int i = 0; i < hash->length; i++){
+    //    if(hash->hash_array[i].state == BUSY)
+    //        hash->destroy_f(hash->hash_array[i].value);
+        if(hash->hash_array[i].state != DELETED )
+            free(hash->hash_array[i].key);
     }
-  }
   free(hash->hash_array);
   free(hash);
 }

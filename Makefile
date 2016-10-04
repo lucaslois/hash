@@ -16,7 +16,7 @@ run: pruebas
 reset: hash.o pruebas
 	rm hash.o pruebas
 
-remove_cgcore:
+remove_vgcore:
 	rm vgcore.*
 
 valgrind: pruebas

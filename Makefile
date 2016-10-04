@@ -14,7 +14,7 @@ run: pruebas
 	./pruebas
 
 reset: hash.o pruebas
-	rm hash.o pruebas
+	rm hash.o pruebas .hash.c.swp vgcore.*
 
 remove_vgcore:
 	rm vgcore.*

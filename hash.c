@@ -16,7 +16,8 @@ struct hash_node {
 struct hash {
     hash_node_t * hash_array;
     size_t length;
-    size_t busy_space;
+    size_t node_busy;
+
 //    hash_destruir_dato_t destroy_f;
 };
 
@@ -40,7 +41,7 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     hash_t * hash = malloc(sizeof(hash_t));
     if(!hash) return NULL;
     hash->length = LARGO;
-    hash->busy_space = 0;
+    hash->node_busy = 0;
 //    hash->destroy_f = destruir_dato;
     hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
@@ -59,7 +60,7 @@ hash_t *hash_crear_custom(hash_destruir_dato_t destruir_dato, size_t tam) {
     hash_t * hash = malloc(sizeof(hash_t));
     if(!hash) return NULL;
     hash->length = tam;
-    hash->busy_space = 0;
+    hash->node_busy = 0;
     hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
     // Inicializo todos los nodos en EMPTY.
@@ -82,7 +83,7 @@ void hash_copy(hash_t* old_hash, hash_t* new_hash) {
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
-    if(hash->busy_space > (hash->length - hash->length / 2)) {
+    if(hash->node_busy > (hash->length - hash->length / 2)) {
         //printf("\n\n%s\n\n","SE PRODUJO UNA REDIMENSION" );
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
         hash_copy(hash, new_hash);
@@ -96,7 +97,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
             strcpy(hash->hash_array[i].key,clave);
             hash->hash_array[i].value = dato;
             hash->hash_array[i].state = BUSY;
-            hash->busy_space++;
+            hash->node_busy++;
             return true;
         }
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
@@ -109,7 +110,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
             strcpy(hash->hash_array[i].key,clave);
             hash->hash_array[i].value = dato; //*dato
             hash->hash_array[i].state = BUSY;
-            hash->busy_space++;
+            hash->node_busy++;
             return true;
         }
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
@@ -121,13 +122,13 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 }
 
 size_t hash_cantidad(const hash_t *hash){
-    return hash->busy_space;
+    return hash->node_busy;
 }
 
 void *hash_obtener(const hash_t *hash, const char *clave) {
     int hashed_key = hash_function(clave, hash->length);
 
-    if(hash->busy_space == 0)
+    if(hash->node_busy == 0)
         return NULL;
 
     for(int i = hashed_key ; i < hash->length; i++) {
@@ -152,10 +153,10 @@ void *hash_obtener(const hash_t *hash, const char *clave) {
 void *hash_borrar(hash_t *hash, const char *clave){
 
     int hashed_key = hash_function(clave, (int)hash->length);
-    if(hash->busy_space == 0)
+    if(hash->node_busy == 0)
         return NULL;
 
-    if(hash->busy_space == hash->length / 5 ) {
+    if(hash->node_busy == hash->length / 5 ) {
         hash_t* new_hash = hash_crear_custom(NULL, hash->length / 2);
         hash_copy(hash, new_hash);
         hash_destruir(hash);
@@ -169,7 +170,7 @@ void *hash_borrar(hash_t *hash, const char *clave){
             hash->hash_array[i].key = NULL;
             hash->hash_array[i].value = NULL;
             hash->hash_array[i].state = DELETED;
-            hash->busy_space--;
+            hash->node_busy--;
             return aux;
         }
     }
@@ -180,7 +181,7 @@ void *hash_borrar(hash_t *hash, const char *clave){
             hash->hash_array[i].key = NULL;
             hash->hash_array[i].value = NULL;
             hash->hash_array[i].state = DELETED;
-            hash->busy_space--;
+            hash->node_busy--;
             return aux;
         }
     }
@@ -190,7 +191,7 @@ void *hash_borrar(hash_t *hash, const char *clave){
 bool hash_pertenece(const hash_t *hash, const char *clave){
     int hashed_key = hash_function(clave, (int)hash->length);
 
-    if(hash->busy_space == 0)
+    if(hash->node_busy == 0)
         return false;
 
     for(int i = hashed_key ; hashed_key < hash->length; i++) {

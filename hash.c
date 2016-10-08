@@ -86,7 +86,7 @@ void hash_copy(hash_t* old_hash, hash_t* new_hash) {
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
     if(hash->busy_space > (hash->length - hash->length / 5)) {
-        //printf("\n\n%s\n\n","SE PRODUJO UNA REDIMENSION" ); //descomentar para ver que redimension mil veces
+        printf("Redimensiono porque no tengo espacio (Ocupado: %d, Libre: %d) \n", (int)hash->busy_space, (int)hash->length);
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
         hash_copy(hash, new_hash);
         for(int i = 0; i < hash->length; i++){

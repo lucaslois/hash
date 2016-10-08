@@ -3,7 +3,7 @@
 #include <string.h>
 #include "hash.h"
 
-#define LARGO 50
+#define LARGO 1500
 
 enum nodo_state {BUSY,EMPTY,DELETED};
 

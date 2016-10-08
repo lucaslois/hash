@@ -18,7 +18,7 @@ struct hash {
     size_t length;
     size_t node_busy;
     size_t busy_space;
-//    hash_destruir_dato_t destroy_f;
+    hash_destruir_dato_t destroy_f;
 };
 
 struct hash_iter {
@@ -43,7 +43,7 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     hash->length = LARGO;
     hash->node_busy = 0;
     hash->busy_space = 0;
-//    hash->destroy_f = destruir_dato;
+    hash->destroy_f = destruir_dato;
     hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
     // Inicializo todos los nodos en EMPTY.
@@ -63,6 +63,7 @@ hash_t *hash_crear_custom(hash_destruir_dato_t destruir_dato, size_t tam) {
     hash->length = tam;
     hash->node_busy = 0;
     hash->busy_space =0;
+    hash->destroy_f = destruir_dato;
     hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
     // Inicializo todos los nodos en EMPTY.
@@ -107,6 +108,8 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
             return true;
         }
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            if(hash->destroy_f){
+            hash->destroy_f(hash->hash_array[i].value);}
             hash->hash_array[i].value = dato;
             return true;
         }
@@ -171,7 +174,7 @@ void *hash_borrar(hash_t *hash, const char *clave){
             }
           free(hash->hash_array);
 
-      //  hash_destruir(hash);
+        //hash_destruir(hash);
         *hash = *new_hash;
     }
 
@@ -227,6 +230,9 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
 
 void hash_destruir(hash_t *hash){
     for(int i = 0; i < hash->length; i++){
+      if(hash->destroy_f){
+          hash->destroy_f(hash->hash_array[i].value);
+      }
       free(hash->hash_array[i].key);
     }
   free(hash->hash_array);

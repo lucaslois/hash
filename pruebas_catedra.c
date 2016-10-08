@@ -109,8 +109,8 @@ static void prueba_hash_reemplazar_con_destruir()
 {
     hash_t* hash = hash_crear(free);
 
-    char *clave1 = "perro", *valor1a, *valor1b;
-    char *clave2 = "gato", *valor2a, *valor2b;
+    char *clave1 = "pato", *valor1a, *valor1b;
+    char *clave2 = "lince", *valor2a, *valor2b;
 
     /* Pide memoria para 4 valores */
     valor1a = malloc(10 * sizeof(char));

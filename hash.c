@@ -17,7 +17,7 @@ struct hash {
     hash_node_t * hash_array;
     size_t length;
     size_t node_busy;
-
+    size_t busy_space;
 //    hash_destruir_dato_t destroy_f;
 };
 
@@ -42,6 +42,7 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     if(!hash) return NULL;
     hash->length = LARGO;
     hash->node_busy = 0;
+    hash->busy_space = 0;
 //    hash->destroy_f = destruir_dato;
     hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
@@ -61,6 +62,7 @@ hash_t *hash_crear_custom(hash_destruir_dato_t destruir_dato, size_t tam) {
     if(!hash) return NULL;
     hash->length = tam;
     hash->node_busy = 0;
+    hash->busy_space =0;
     hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
     // Inicializo todos los nodos en EMPTY.
@@ -83,11 +85,14 @@ void hash_copy(hash_t* old_hash, hash_t* new_hash) {
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
-    if(hash->node_busy > (hash->length - hash->length / 2)) {
-        //printf("\n\n%s\n\n","SE PRODUJO UNA REDIMENSION" );
+    if(hash->busy_space > (hash->length - hash->length / 5)) {
+        printf("\n\n%s\n\n","SE PRODUJO UNA REDIMENSION" );
         hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
         hash_copy(hash, new_hash);
-        hash_destruir(hash);
+        for(int i = 0; i < hash->length; i++){
+              free(hash->hash_array[i].key);
+            }
+        free(hash->hash_array);
         *hash = *new_hash;
     }
 
@@ -98,6 +103,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
             hash->hash_array[i].value = dato;
             hash->hash_array[i].state = BUSY;
             hash->node_busy++;
+            hash->busy_space++;
             return true;
         }
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
@@ -111,6 +117,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
             hash->hash_array[i].value = dato; //*dato
             hash->hash_array[i].state = BUSY;
             hash->node_busy++;
+            hash->busy_space++;
             return true;
         }
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
@@ -159,7 +166,12 @@ void *hash_borrar(hash_t *hash, const char *clave){
     if(hash->node_busy == hash->length / 5 ) {
         hash_t* new_hash = hash_crear_custom(NULL, hash->length / 2);
         hash_copy(hash, new_hash);
-        hash_destruir(hash);
+        for(int i = 0; i < hash->length; i++){
+              free(hash->hash_array[i].key);
+            }
+          free(hash->hash_array);
+
+      //  hash_destruir(hash);
         *hash = *new_hash;
     }
 
@@ -215,10 +227,7 @@ bool hash_pertenece(const hash_t *hash, const char *clave){
 
 void hash_destruir(hash_t *hash){
     for(int i = 0; i < hash->length; i++){
-    //    if(hash->hash_array[i].state == BUSY)
-    //        hash->destroy_f(hash->hash_array[i].value);
-        if(hash->hash_array[i].state != DELETED )
-            free(hash->hash_array[i].key);
+      free(hash->hash_array[i].key);
     }
   free(hash->hash_array);
   free(hash);

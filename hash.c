@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "hash.h"
-
 #define LARGO 1500
 
 enum nodo_state {BUSY,EMPTY,DELETED};

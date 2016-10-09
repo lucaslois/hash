@@ -52,8 +52,6 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
         hash->hash_array[i].key = malloc(sizeof(char[200]));
         hash->hash_array[i].value = NULL;
     }
-
-
     return hash;
 }
 
@@ -66,29 +64,58 @@ bool hash_redimendionar(hash_t *hash,size_t new_size){
   }
   if(!new_array) return false;
   for(int i=0 ; i < hash->length ; i++){
-    int hashed_key = hash_function(hash->hash_array[i].key,new_size);
-    //UNA FORMA DE COPIAR EL NODO DIRECTO.
-    //new_array[hashed_key] = hash->hash_array[i];
-    //OTRA FORMA DE COPIAR TODOO EL NODO, CON DOS FORMAS DISTINTAS EXLUYENTES DE COPIAR LA KEY
+      int hashed_key = hash_function(hash->hash_array[i].key,new_size);
+      for(int e = hashed_key ; e < new_size ; e++){
+        if(hash->hash_array[e].state == EMPTY) {
+            strcpy(new_array[e].key,hash->hash_array[i].key);
+            new_array[e].value = hash->hash_array[i].value;
+            new_array[e].state = BUSY;
+            break;
+        }
+        if(new_array[e].state == BUSY && strcmp(hash->hash_array[i].key,new_array[e].key) == 0 ) {
+            if(hash->destroy_f){
+            hash->destroy_f(new_array[e].value);}
+            new_array[e].value = hash->hash_array[i].value;
+            break;
+        }
+      }
+      for(int e = 0 ; e < hashed_key ; e++){
+        if(hash->hash_array[e].state == EMPTY) {
+            strcpy(new_array[e].key,hash->hash_array[i].key);
+            new_array[e].value = hash->hash_array[i].value;
+            new_array[e].state = BUSY;
+            break;
+        }
+        if(new_array[e].state == BUSY && strcmp(hash->hash_array[i].key,new_array[e].key) == 0 ) {
+            if(hash->destroy_f){
+            hash->destroy_f(new_array[e].value);}
+            new_array[e].value = hash->hash_array[i].value;
+            break;
+        }
+      }
+      //UNA FORMA DE COPIAR EL NODO DIRECTO.
+      //new_array[hashed_key] = hash->hash_array[i];
 
-    //strcpy(new_array[hashed_key].key,hash->hash_array[i].key); //FORMA1
-    //new_array[hashed_key].key = hash->hash_array[i].key;      //FORMA2
-    //new_array[hashed_key].value = hash->hash_array[i].value;
-    //new_array[hashed_key].state = hash->hash_array[i].state;
+      //OTRA FORMA DE COPIAR TODOO EL NODO, CON DOS FORMAS DISTINTAS EXLUYENTES DE COPIAR LA KEY
+      //strcpy(new_array[hashed_key].key,hash->hash_array[i].key); //FORMA1
+      //new_array[hashed_key].key = hash->hash_array[i].key;      //FORMA2
+      //new_array[hashed_key].value = hash->hash_array[i].value;
+      //new_array[hashed_key].state = hash->hash_array[i].state;
   }
-  //aca yo haria un free de las claves del hash anterior.. pero ni idea.
+    //aca yo haria un free de las claves del hash anterior.. pero ni idea.
   free(hash->hash_array);
   hash->hash_array = new_array;
+  hash->busy_space = hash->node_busy;
   hash->length = new_size;
   return true;
 }
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
-    if(hash->busy_space > (hash->length - hash->length / 5)) {
-        //printf("Redimensiono porque no tengo espacio (Ocupado: %d, Libre: %d) \n", (int)hash->busy_space, (int)hash->length);
-        if(!hash_redimendionar(hash,hash->length*2)) return false;
-
+    if(hash->busy_space > (hash->length - hash->length / 4)) {
+        printf("Redimensiono porque no tengo espacio (Ocupado: %d, Libre: %d) \n", (int)hash->busy_space, (int)hash->length);
+        if(!hash_redimendionar(hash,hash->length*2))
+            return false;
     }
 
     int hashed_key = hash_function(clave, hash->length);

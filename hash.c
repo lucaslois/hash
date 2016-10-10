@@ -3,7 +3,7 @@
 #include <string.h>
 #include "hash.h"
 
-#define LARGO 1500
+#define LARGO 50
 
 enum nodo_state {BUSY,EMPTY,DELETED};
 
@@ -36,6 +36,20 @@ int hash_function(const char *key_string, size_t tam){
     return (int)aux;
 }
 
+hash_node_t *new_array(size_t tam) {
+    hash_node_t *array = malloc(sizeof(hash_node_t) * tam);
+    if(!array)
+        return NULL;
+
+    // Inicializo todos los nodos en EMPTY.
+    for(int i = 0; i < tam; i++){
+        array[i].state = EMPTY;
+        array[i].key = malloc(sizeof(char[200]));
+        array[i].value = NULL;
+    }
+
+    return array;
+}
 
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     hash_t * hash = malloc(sizeof(hash_t));
@@ -44,58 +58,61 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
     hash->node_busy = 0;
     hash->busy_space = 0;
     hash->destroy_f = destruir_dato;
-    hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
-
-    // Inicializo todos los nodos en EMPTY.
-    for(int i = 0; i < hash->length; i++){
-        hash->hash_array[i].state = EMPTY;
-        hash->hash_array[i].key = malloc(sizeof(char[200]));
-        hash->hash_array[i].value = NULL;
-    }
-
+    hash->hash_array = new_array(hash->length);
 
     return hash;
 }
-//holalois
 
-hash_t *hash_crear_custom(hash_destruir_dato_t destruir_dato, size_t tam) {
-    hash_t * hash = malloc(sizeof(hash_t));
-    if(!hash) return NULL;
-    hash->length = tam;
-    hash->node_busy = 0;
-    hash->busy_space =0;
-    hash->destroy_f = destruir_dato;
-    hash->hash_array = malloc(sizeof(hash_node_t) * hash->length);
 
-    // Inicializo todos los nodos en EMPTY.
-    for(int i = 0; i < hash->length; i++){
-        hash->hash_array[i].state = EMPTY;
-        hash->hash_array[i].key = malloc(sizeof(char[200]));
-        hash->hash_array[i].value = NULL;
-    }
-    return hash;
-}
-
-void hash_copy(hash_t* old_hash, hash_t* new_hash) {
-    for(int i = 0; i < old_hash->length ; i++){
-        if(old_hash->hash_array[i].state == BUSY) {
-            hash_guardar(new_hash, old_hash->hash_array[i].key, old_hash->hash_array[i].value);
+int buscar_lugar_vacio(hash_node_t* array, size_t tam, int index) {
+    for(int i = index ; i < tam; i++) { // RECORRO DE HASH_KEY HASTA EL FINAL BUSCANDO UNO VACIO
+        if(array[i].state == EMPTY) {
+            return i;
         }
     }
-    return;
+    for(int i = 0; i < index; i++) { // RECORRO DE 0 HASTA HASH_KEY BUSCANDO UNO VACIO
+        if(array[i].state == EMPTY) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+bool copy_arrays(hash_node_t *array1, size_t tam1, hash_node_t *array2, size_t tam2) {
+    for(int x = 0; x < tam1; x++) { // RECORRO EL ARREGLO 1
+        if(array1[x].state == BUSY) { // SI EL ELEMENTO DEL ARREGLO 1 ESTA OCUPADO
+
+            int new_key = hash_function(array1[x].key, tam2);
+            int index = buscar_lugar_vacio(array2, tam2, new_key);
+            strcpy(array2[index].key,array1[x].key);
+            array2[index].value = array1[x].value;
+            array2[index].state = BUSY;
+        }
+    }
+}
+
+bool hash_redimensionar(hash_t *hash, size_t new_tam) {
+    printf("Redimensiono porque no tengo espacio (Ocupado: %d, Libre: %d) \n", (int)hash->busy_space, (int)hash->length);
+    hash_node_t *array = new_array(new_tam);
+    if(!array)
+        return false;
+
+    copy_arrays(hash->hash_array, hash->length, array, new_tam);
+
+    for(int i = 0; i < hash->length; i++){
+        free(hash->hash_array[i].key);
+    }
+    free(hash->hash_array);
+    hash->hash_array = array;
+    return true;
 }
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
 
     if(hash->busy_space > (hash->length - hash->length / 5)) {
-        printf("Redimensiono porque no tengo espacio (Ocupado: %d, Libre: %d) \n", (int)hash->busy_space, (int)hash->length);
-        hash_t* new_hash = hash_crear_custom(NULL, hash->length * 2);
-        hash_copy(hash, new_hash);
-        for(int i = 0; i < hash->length; i++){
-              free(hash->hash_array[i].key);
-            }
-        free(hash->hash_array);
-        *hash = *new_hash;
+        hash_redimensionar(hash, hash->length * 2);
+        hash->length = hash->length * 2;
+        hash->busy_space = hash->node_busy;
     }
 
     int hashed_key = hash_function(clave, hash->length);
@@ -132,6 +149,43 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     return false;
 }
 
+void *hash_borrar(hash_t *hash, const char *clave){
+
+    int hashed_key = hash_function(clave, (int)hash->length);
+    if(hash->node_busy == 0)
+        return NULL;
+
+    if(hash->node_busy == hash->length / 5 ) {
+        hash_redimensionar(hash, hash->length / 2);
+        hash->length = hash->length / 2;
+        hash->busy_space = hash->node_busy;
+    }
+
+    for(int i = hashed_key ; i < hash->length; i++) {
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            void* aux = hash->hash_array[i].value;
+            free(hash->hash_array[i].key);
+            hash->hash_array[i].key = NULL;
+            hash->hash_array[i].value = NULL;
+            hash->hash_array[i].state = DELETED;
+            hash->node_busy--;
+            return aux;
+        }
+    }
+    for(int i = 0; i < hashed_key; i++) {
+        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
+            void* aux = hash->hash_array[i].value;
+            free(hash->hash_array[i].key);
+            hash->hash_array[i].key = NULL;
+            hash->hash_array[i].value = NULL;
+            hash->hash_array[i].state = DELETED;
+            hash->node_busy--;
+            return aux;
+        }
+    }
+    return NULL;
+}
+
 size_t hash_cantidad(const hash_t *hash){
     return hash->node_busy;
 }
@@ -156,49 +210,6 @@ void *hash_obtener(const hash_t *hash, const char *clave) {
         }
         if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
             return hash->hash_array[i].value;
-        }
-    }
-    return NULL;
-}
-
-void *hash_borrar(hash_t *hash, const char *clave){
-
-    int hashed_key = hash_function(clave, (int)hash->length);
-    if(hash->node_busy == 0)
-        return NULL;
-
-    if(hash->node_busy == hash->length / 5 ) {
-        hash_t* new_hash = hash_crear_custom(NULL, hash->length / 2);
-        hash_copy(hash, new_hash);
-        for(int i = 0; i < hash->length; i++){
-              free(hash->hash_array[i].key);
-            }
-          free(hash->hash_array);
-
-        //hash_destruir(hash);
-        *hash = *new_hash;
-    }
-
-    for(int i = hashed_key ; i < hash->length; i++) {
-        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
-            void* aux = hash->hash_array[i].value;
-            free(hash->hash_array[i].key);
-            hash->hash_array[i].key = NULL;
-            hash->hash_array[i].value = NULL;
-            hash->hash_array[i].state = DELETED;
-            hash->node_busy--;
-            return aux;
-        }
-    }
-    for(int i = 0; i < hashed_key; i++) {
-        if(hash->hash_array[i].state == BUSY && strcmp(clave,hash->hash_array[i].key) == 0 ) {
-            void* aux = hash->hash_array[i].value;
-            free(hash->hash_array[i].key);
-            hash->hash_array[i].key = NULL;
-            hash->hash_array[i].value = NULL;
-            hash->hash_array[i].state = DELETED;
-            hash->node_busy--;
-            return aux;
         }
     }
     return NULL;
@@ -242,12 +253,13 @@ void hash_destruir(hash_t *hash){
 
 // AUXILIAR
 void hash_mostrar(hash_t* hash) {
-    for(int x = 0; x < hash->length; x++) {
+    /*for(int x = 0; x < hash->length; x++) {
         if(hash->hash_array[x].state == BUSY)
             printf("Indice %d (colision %d) - [%s]\n", x, hash_function(hash->hash_array[x].key, hash->length), hash->hash_array[x].key);
         else
             printf("Indice %d - BORRADO / VACIO\n", x);
-    }
+    }*/
+    return;
 }
 
 // COMIENZO FUNCIONES DE ITERADOR

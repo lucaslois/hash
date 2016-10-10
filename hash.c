@@ -56,6 +56,7 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato){
 
     return hash;
 }
+//holalois
 
 hash_t *hash_crear_custom(hash_destruir_dato_t destruir_dato, size_t tam) {
     hash_t * hash = malloc(sizeof(hash_t));
